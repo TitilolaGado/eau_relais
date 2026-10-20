@@ -1,1 +1,1 @@
-import {defineConfig} from 'vite'; import laravel from 'laravel-vite-plugin'; import vue from '@vitejs/plugin-vue'; export default defineConfig({plugins:[laravel({input:['resources/js/app.js','resources/js/offline-app.js'],refresh:true}),vue()]});
+import {defineConfig} from 'vite'; import laravel from 'laravel-vite-plugin'; import vue from '@vitejs/plugin-vue'; export default defineConfig({build:{emptyOutDir:true},plugins:[laravel({input:['resources/js/app.js','resources/js/offline-app.js'],refresh:true}),vue()]});
