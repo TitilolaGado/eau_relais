@@ -1,0 +1,11 @@
+/vendor
+/node_modules
+/.env
+/public/build
+/public/hot
+/storage/**/*.log
+/storage/app/private/*
+/storage/framework/**/*
+/bootstrap/cache/*.php
+/database/*.sqlite
+/.phpunit.result.cache

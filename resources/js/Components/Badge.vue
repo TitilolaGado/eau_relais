@@ -1,0 +1,1 @@
+<script setup>import {statuses,states} from '../lib/labels';defineProps({value:String});</script><template><span :class="['badge',value]"><i></i>{{statuses[value]||states[value]||value}}</span></template>

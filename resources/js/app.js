@@ -1,0 +1,3 @@
+import '../css/app.css';import {createApp,h} from 'vue';import {createInertiaApp} from '@inertiajs/vue3';import Layout from './Components/Layout.vue';import {syncReports} from './lib/offline';
+const pages=import.meta.glob('./Pages/*.vue');createInertiaApp({title:t=>t?`${t} · EauRelais`:'EauRelais',resolve:async name=>{const page=(await pages[`./Pages/${name}.vue`]()).default;page.layout??=Layout;return page;},setup({el,App,props,plugin}){createApp({render:()=>h(App,props)}).use(plugin).mount(el);}});
+if('serviceWorker'in navigator)navigator.serviceWorker.register('/sw.js');window.addEventListener('online',()=>syncReports());syncReports();

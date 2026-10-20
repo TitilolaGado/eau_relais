@@ -1,0 +1,1 @@
+import '../css/app.css';import {createApp} from 'vue';import Report from './Pages/Report.vue';import {syncReports} from './lib/offline';let catalogs={localities:[],points:[]};try{catalogs=JSON.parse(localStorage.getItem('eaurelais:catalogs'))||catalogs;}catch{}createApp(Report,catalogs).mount('#offline-app');window.addEventListener('online',()=>syncReports());

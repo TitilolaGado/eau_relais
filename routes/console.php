@@ -1,0 +1,5 @@
+<?php
+use Illuminate\Support\Facades\{Artisan,Schedule};
+use App\Models\{Maintenance,Notification,User};
+Artisan::command('eaurelais:admin {email} {name}',function(){ $password=$this->secret('Mot de passe (12 caractères minimum)');if(strlen($password)<12){$this->error('Mot de passe trop court.');return 1;}if(User::where('email',$this->argument('email'))->exists()){$this->error('Adresse déjà utilisée.');return 1;}User::create(['email'=>$this->argument('email'),'name'=>$this->argument('name'),'password'=>$password,'role'=>'admin']);$this->info('Administrateur créé.');});
+Schedule::call(function(){foreach(Maintenance::whereNull('completed_at')->whereDate('scheduled_at','<=',today()->addDays(3))->get() as $m){$title='Entretien à suivre : '.$m->waterPoint->name;if(!Notification::where('user_id',$m->responsible_id)->where('title',$title)->whereDate('created_at',today())->exists())Notification::create(['user_id'=>$m->responsible_id,'title'=>$title,'url'=>'/entretiens']);}})->dailyAt('07:00');

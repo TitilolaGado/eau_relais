@@ -1,0 +1,1 @@
+{"name": "EauRelais — Retour de l’eau", "short_name": "EauRelais", "lang": "fr", "start_url": "/signaler", "scope": "/", "display": "standalone", "background_color": "#f5f8f8", "theme_color": "#073e49", "icons": [{"src": "/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any"}]}

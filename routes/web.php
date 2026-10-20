@@ -1,0 +1,36 @@
+<?php
+use Illuminate\Support\Facades\Route;
+use Inertia\Inertia;
+use App\Http\Controllers\{AuthController,IncidentController,InterventionController,DashboardController,CatalogController};
+Route::get('/',fn()=>Inertia::render('Home'));
+Route::get('/points-eau',[CatalogController::class,'points']);
+Route::get('/signaler',[IncidentController::class,'create']);
+Route::post('/signalements',[IncidentController::class,'store'])->middleware('throttle:20,1');
+Route::get('/suivre',[IncidentController::class,'trackForm']);
+Route::post('/suivi/rechercher',[IncidentController::class,'track'])->middleware('throttle:15,1');
+Route::post('/suivi/retour',[IncidentController::class,'trackAction'])->middleware('throttle:15,1');
+Route::get('/session-csrf',fn()=>response()->json(['token'=>csrf_token()])->header('Cache-Control','no-store'));
+Route::middleware('guest')->group(function(){Route::get('/connexion',[AuthController::class,'form'])->name('login');Route::post('/connexion',[AuthController::class,'login'])->middleware('throttle:5,1');});
+Route::middleware('auth')->group(function(){
+ Route::post('/deconnexion',[AuthController::class,'logout']);
+ Route::get('/tableau-de-bord',[DashboardController::class,'index']);
+ Route::get('/incidents',[IncidentController::class,'index']);
+ Route::get('/incidents/{incident}',[IncidentController::class,'show']);
+ Route::post('/incidents/{incident}/statut',[IncidentController::class,'update']);
+ Route::post('/incidents/{incident}/confirmer',[IncidentController::class,'confirm']);
+ Route::post('/incidents/{incident}/interventions',[InterventionController::class,'store']);
+ Route::post('/interventions/{intervention}',[InterventionController::class,'update']);
+ Route::get('/photos/{attachment}',[IncidentController::class,'photo']);
+ Route::post('/points-eau',[CatalogController::class,'savePoint']);
+ Route::post('/points-eau/{point}',[CatalogController::class,'savePoint']);
+ Route::get('/techniciens',[CatalogController::class,'technicians']);
+ Route::post('/techniciens/{profile}/disponibilite',[CatalogController::class,'availability']);
+ Route::get('/entretiens',[CatalogController::class,'maintenance']);
+ Route::post('/entretiens',[CatalogController::class,'storeMaintenance']);
+ Route::post('/entretiens/{maintenance}/terminer',[CatalogController::class,'finishMaintenance']);
+ Route::get('/administration',[CatalogController::class,'admin']);
+ Route::post('/administration/comptes',[CatalogController::class,'saveUser']);
+ Route::post('/administration/comptes/{user}',[CatalogController::class,'updateUser']);
+ Route::post('/administration/localites',[CatalogController::class,'saveLocality']);
+ Route::post('/notifications/lire',function(){auth()->user()->notifications()->whereNull('read_at')->update(['read_at'=>now()]);return back();});
+});

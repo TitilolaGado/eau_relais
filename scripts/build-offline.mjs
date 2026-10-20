@@ -1,0 +1,11 @@
+import fs from 'node:fs';import crypto from 'node:crypto';
+const m=JSON.parse(fs.readFileSync('public/build/manifest.json','utf8'));const entry=m['resources/js/offline-app.js'];const css=new Set();function gather(e){for(const c of e.css||[])css.add(c);for(const key of e.imports||[])gather(m[key]);}gather(entry);
+const html=`<!doctype html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#073e49"><title>EauRelais · Signaler hors connexion</title>${[...css].map(c=>`<link rel="stylesheet" href="/build/${c}">`).join('')}</head><body><header class="topbar"><a class="brand" href="/">💧 EauRelais</a><span class="badge">Mode hors connexion</span></header><main class="public-main"><p class="notice">Préparez votre signalement sur cet appareil. Le suivi et les espaces professionnels nécessitent une connexion.</p><div id="offline-app"></div></main><script type="module" src="/build/${entry.file}"></script></body></html>`;fs.writeFileSync('public/offline.html',html);
+const assets=fs.readdirSync('public/build/assets').filter(f=>/\.(js|css|woff2)$/.test(f)).map(f=>'/build/assets/'+f);const version=crypto.createHash('sha256').update(JSON.stringify(m)+html).digest('hex').slice(0,12);
+fs.writeFileSync('public/sw.js',`const CACHE='eaurelais-${version}';const ASSETS=${JSON.stringify(['/offline.html','/icon.svg','/manifest.webmanifest',...assets])};
+self.addEventListener('install',e=>{e.waitUntil(caches.open(CACHE).then(c=>c.addAll(ASSETS)).then(()=>self.skipWaiting()));});
+self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k.startsWith('eaurelais-')&&k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim()));});
+self.addEventListener('fetch',e=>{const u=new URL(e.request.url);if(e.request.method!=='GET'||u.origin!==location.origin)return;
+if(e.request.mode==='navigate'){e.respondWith(fetch(e.request).catch(()=>caches.match('/offline.html')));return;}
+if(ASSETS.includes(u.pathname))e.respondWith(caches.match(e.request).then(c=>c||fetch(e.request)));});`);
+console.log('PWA : coquille hors connexion et '+assets.length+' ressources statiques. Aucune page privée en cache.');
